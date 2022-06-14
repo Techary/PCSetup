@@ -3,7 +3,7 @@ Baseline PC Setup script
 
 Open powershell as admin  
 CD to location (probably C:\users\sysadmin\downloads)  
-run "powershell.exe -executionpolicy unrestricted .\PCSetup.ps1"  
+run: powershell.exe -executionpolicy unrestricted .\PCSetup.ps1
 
 Does the following:  
   Removes any current 365 installations  
