@@ -35,13 +35,42 @@ function CountDown() {
   }
 }
 
+Function invoke-debloat {
+
+    $Bloatware = @(
+
+        #Sponsored Windows 10 AppX Apps
+        #Add sponsored/featured apps to remove in the "*AppName*" format
+        "*EclipseManager*"
+        "*ActiproSoftwareLLC*"
+        "*AdobeSystemsIncorporated.AdobePhotoshopExpress*"
+        "*Duolingo-LearnLanguagesforFree*"
+        "*PandoraMediaInc*"
+        "*CandyCrush*"
+        "*BubbleWitch3Saga*"
+        "*Wunderlist*"
+        "*Flipboard*"
+        "*Twitter*"
+        "*Facebook*"
+        "*Spotify*"
+        "*Minecraft*"
+        "*Royal Revolt*"
+        "*Sway*"
+        "*Speed Test*"
+        "*Dolby*"
+
+    )
+    foreach ($Bloat in $Bloatware) 
+        {
+            Get-AppxPackage -Name $Bloat| Remove-AppxPackage
+            Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat | Remove-AppxProvisionedPackage -Online
+            Write-Output "Trying to remove $Bloat."
+        }
+}
+
 function Remove-PreviousOfficeInstall {
 
     get-appxpackage | where {$_.name -like "*MicrosoftOfficeHub"} | remove-appxpackage
-
-    $AppName = "*Click-To-Run*"
-
-    $MyApp = Get-WmiObject -Class Win32_Product | Where-Object {$_.Name -like "$AppName"}
 
     new-item -ItemType "directory" -path C:\ODT -ErrorAction SilentlyContinue
 
@@ -99,8 +128,6 @@ function get-office {
 
     new-item -ItemType "directory" -path C:\ODT -ErrorAction SilentlyContinue
 
-    #New-Item "C:\odt\configuration.xml"
-
     start-sleep 1
 
     Set-Content "C:\odt\configuration.xml" '<Configuration ID="ed9360b9-7bc9-42de-b1df-559951506f10">
@@ -127,16 +154,6 @@ function get-office {
                                             </Configuration>'
 
     start-sleep 1
-    <#
-    $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -uri https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_13929-20296.exe -outfile "C:\odt\odt.exe"
-
-    Set-Location C:\odt
-
-    .\odt.exe /extract:C:\ODT /quiet
-
-    start-sleep 1
-    #>
 
     .\setup.exe /configure configuration.xml
 
@@ -289,7 +306,7 @@ function Install-allWindowsUpdates {
 
         }
 
-    $updates = get-windowsupdate
+    $updates = get-windowsupdate | where {$_.LastDeploymentChangeTime -lt (get-date).AddDays(-7) -and $_.kb -ne ""}
 
     if ($null -ne $updates)
         {
@@ -337,6 +354,8 @@ function cleanUp {
 
 
 # -----------------------------------------------------------------------------------------------------------------
+
+invoke-debloat
 
 do {
     $dovpn = read-host "Do you need to connect to a VPN? y/n "
