@@ -5,7 +5,7 @@ Open powershell as admin
 CD to location (probably C:\users\sysadmin\downloads)  
 run: powershell.exe -executionpolicy unrestricted .\PCSetup.ps1
 
-Does the following:
+Does the following:  
   Removes pre-installed bloatware
   Removes any current 365 installations  
   Installs Chrome  
