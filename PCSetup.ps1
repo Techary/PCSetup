@@ -155,6 +155,8 @@ function get-office {
 
     start-sleep 1
 
+    Set-Location C:\odt
+
     .\setup.exe /configure configuration.xml
 
 }
@@ -300,7 +302,7 @@ function Install-allWindowsUpdates {
 
             write-output "PSwindowsupdate module not found, installing..."
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-            Install-PackageProvider - NuGet -force
+            Install-PackageProvider -NuGet -force
             install-module pswindowsupdate -Force
             import-module pswindowsupdate
 
