@@ -303,7 +303,7 @@ function Install-allWindowsUpdates {
             write-output "PSwindowsupdate module not found, installing..."
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
             Install-PackageProvider NuGet -force
-            install-module pswindowsupdate -Force
+            install-module pswindowsupdate -Force -SkipPublisherCheck
             import-module pswindowsupdate
 
         }
@@ -360,18 +360,31 @@ function cleanUp {
 invoke-debloat
 
 do {
-    $dovpn = read-host "Do you need to connect to a VPN? y/n "
-    switch ($dovpn)
+    $Addvpn = read-host "Do you need to add a VPN? y/n "
+    switch ($Addvpn)
         {
             y { add-VPN
-                connect-vpn
+                
             }
 
             n { continue }
             Default { "You didn't enter an expect response, you idiot." }
         }
      }
-     until ($dovpn-eq 'y' -or $dovpn -eq 'n')
+     until ($Addvpn-eq 'y' -or $Addvpn -eq 'n')
+
+do {
+    $dovpn = read-host "Do you need to connect to the previously added VPN? y/n "
+    switch ($dovpn)
+        {
+            y { connect-vpn
+            }
+
+            n { continue }
+            Default { "You didn't enter an expect response, you idiot." }
+        }
+        }
+        until ($dovpn-eq 'y' -or $dovpn -eq 'n')
 
 do {
     $doAddDomain = read-host "Do you need to connect to a domain? y/n "
