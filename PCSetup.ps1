@@ -35,6 +35,7 @@ function CountDown() {
   }
 }
 
+#Removes pre-installed windows bloatware
 Function invoke-debloat {
 
     $Bloatware = @(
@@ -68,16 +69,19 @@ Function invoke-debloat {
         }
 }
 
+#removes previous installations of office (either windows app store or standalone launcher)
 function Remove-PreviousOfficeInstall {
 
+    #Removes windows app store version of office
     get-appxpackage | where {$_.name -like "*MicrosoftOfficeHub"} | remove-appxpackage
 
+    #Creates a folder to store the office deployment tool
     new-item -ItemType "directory" -path C:\ODT -ErrorAction SilentlyContinue
-
+    #Creates the configuration xml, blank
     New-Item "C:\odt\configuration.xml"
 
     start-sleep 1
-
+    #Fills out the configuration xml with instructions to remove any instances of office installed via the standalone launcher
     Set-Content "C:\odt\configuration.xml" '<Configuration>
     <Display Level="none" CompletionNotice="no" SuppressModal="yes" AcceptEula="yes" />
     <Logging Level="Standard" Path="\\path\to\Logfile\RemoveOffice2016\Logs" />
@@ -85,31 +89,33 @@ function Remove-PreviousOfficeInstall {
     </Configuration>'
 
     start-sleep 1
-    
+    #Downloads the ODT tool
     $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_13929-20296.exe" -outfile "C:\odt\odt.exe"
 
     Set-Location C:\odt
-
+    #Extracts the setup.exe from the ODT tool
     .\odt.exe /extract:C:\ODT /quiet
 
     start-sleep 1
-
+    #Installs office via the setup.exe, using the configuration xml created on line 85
     .\setup.exe /configure configuration.xml
 
 
 }
 
+#Installs chrome
 function get-chrome {
+    #Downloads chrome installer
     $url = "http://dl.google.com/chrome/install/375.126/chrome_installer.exe"
     $ChromePath = "C:\users\$env:username\chrome.exe"
     write-host "Downloading Google Chrome"
     $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest -Uri $url -OutFile $ChromePath
-
+    #Ensures that chrome is downloaded (somtimes the download fails)
     if((test-path $ChromePath) -eq "True")
         {
-
+            #If downloaded, silently launches the installer
             Set-Location C:\users\$env:username
             .\chrome.exe /silent /install
             write-host "Installing chrome..."
@@ -117,19 +123,20 @@ function get-chrome {
         }
     else
         {
-
+            #If not downloaded, downloads
             Write-host "Chrome not downloaded, downloading..."
             get-chrome
 
         }
 }
 
+#Installs office 365
 function get-office {
-
+    #Creats the dir, same as line 78. Does not give an error if the dir already exists
     new-item -ItemType "directory" -path C:\ODT -ErrorAction SilentlyContinue
 
     start-sleep 1
-
+    #Changes the configuration xml to install the correct version of office
     Set-Content "C:\odt\configuration.xml" '<Configuration ID="ed9360b9-7bc9-42de-b1df-559951506f10">
                                             <Add OfficeClientEdition="64" Channel="Current">
                                                 <Product ID="O365BusinessRetail">
@@ -156,35 +163,37 @@ function get-office {
     start-sleep 1
 
     Set-Location C:\odt
-
+    #Installs office via the setup.exe, using the configuration xml created on line 138. If you're running this manually, ENSURE YOU HAVE RUN LINES 94 & 98 FIRST.
     .\setup.exe /configure configuration.xml
 
 }
 
+#Installs adobe
 function get-Adobe {
-
+    #Downloads the adobe installer
     $url = "http://ardownload.adobe.com/pub/adobe/reader/win/AcrobatDC/2100120155/AcroRdrDC2100120155_en_US.exe"
     $AdobePath = "C:\users\$env:username\adobe.exe"
     write-host "Downloading Adobe Acrobat"
     $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest -Uri $url -OutFile $AdobePath
-
+    #Ensures that adobe is downloaded (somtimes the download fails)
     if((test-path -path $AdobePath) -eq "True")
         {
-
+            #If downloaded, launches the installer
             Start-Process -filepath $AdobePath -ArgumentList "/sPB /rs"
             write-host "Installing Adobe... "
 
         }
     else
         {
-
+            #If not downloaded, downloads
             Write-host "Adobe Acrobat not downloaded, downloading..."
             get-adobe
             
         }
 }
 
+#Installs S1 (THIS WILL NOT WORK WHEN RUNNING MANUALLY)
 function Get-S1 {
 
     Param
@@ -193,17 +202,19 @@ function Get-S1 {
             [Parameter(Mandatory=$true)][string]$token
 
         )
-
+    #Downloads the S1 installer from the Techary hosted FTP
     invoke-webrequest "content.techary.com/SentinelInstaller-x64_windows_64bit_v21_7_5_1080.exe" -OutFile "SentinelOneAgent.exe"
 
-
+    #Launches the S1 installer using the provided token
     .\SentinelOneAgent.exe /SITE_TOKEN=$token /silent /norestart
 
 
 }
 
+#Creates a windows VPN entry
 function add-VPN {
 
+    #Gets VPN setup info
     function get-VPNInformation {
 
         $global:vpnName = read-host "`nEnter the name you want the VPN to display"
@@ -228,6 +239,7 @@ function add-VPN {
 
     }
 
+    #Adds the VPN
     function add-vpn {
 
         try
@@ -250,6 +262,7 @@ function add-VPN {
 
 }
 
+#Connects to the VPN, if confirmed 
 function connect-vpn {
 
     $vpn = Get-VpnConnection -Name $global:vpnName
@@ -259,7 +272,8 @@ function connect-vpn {
     }
 
 }
-                
+
+#Adds to the domain
 function add-domain {
 
     $domain = read-host "`nEnter the domain name"
@@ -289,8 +303,10 @@ function add-domain {
         }  
 }
 
+#Installs ALL released windows updates
 function Install-allWindowsUpdates {
 
+    #Installs the PSWINDOWSUPDATE module
     if (get-module pswindowsupdate) 
         {
         
@@ -308,11 +324,12 @@ function Install-allWindowsUpdates {
 
         }
 
-    $updates = get-windowsupdate | where {$_.LastDeploymentChangeTime -lt (get-date).AddDays(-7) -and $_.kb -ne ""}
-
+    #Collats all windows updates
+    $updates = Get-WindowsUpdate
+    #Checks if $updates is null
     if ($null -ne $updates)
         {
-
+            #If not null, only installs updates with titles that match the below strings
             foreach($update in $updates) 
                 {
                         if ($update.title -like "*Cumulative*" `
@@ -338,7 +355,7 @@ function Install-allWindowsUpdates {
 
 }
 
-
+#Removes installers and created temp dir's
 function cleanUp {
 
     Remove-Item -recurse -force "C:\odt"
