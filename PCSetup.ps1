@@ -6,10 +6,10 @@ function Test-Admin {
 }
 
 if ((Test-Admin) -eq $false)  {
-    if ($elevated) 
+    if ($elevated)
     {
         # tried to elevate, did not work, aborting
-    } 
+    }
     else {
         Start-Process powershell.exe -Verb RunAs -ArgumentList ('-noprofile -noexit -file "{0}" -elevated' -f ($myinvocation.MyCommand.Definition))
 }
@@ -61,11 +61,34 @@ Function invoke-debloat {
         "*Dolby*"
 
     )
-    foreach ($Bloat in $Bloatware) 
+    foreach ($Bloat in $Bloatware)
         {
-            Get-AppxPackage -Name $Bloat| Remove-AppxPackage
-            Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat | Remove-AppxProvisionedPackage -Online
             Write-Output "Trying to remove $Bloat."
+            try
+                {
+
+                    Get-AppxPackage -Name $Bloat -ErrorAction Stop | Remove-AppxPackage -ErrorAction Stop
+                    Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat | Remove-AppxProvisionedPackage -Online -ErrorAction Stop
+
+                }
+            catch 
+                {
+                    Write-Output "Unable to uninstall $bloat" $_.Exception
+                    $uninstallError = $true
+                }
+            finally
+                {
+
+                    if ($uninstallError -ne $true)
+                        {
+
+                            write-output "$bloat uninstalled successfully"
+
+                        }
+
+                }
+
+
         }
 }
 
@@ -189,7 +212,7 @@ function get-Adobe {
             #If not downloaded, downloads
             Write-host "Adobe Acrobat not downloaded, downloading..."
             get-adobe
-            
+
         }
 }
 
@@ -234,7 +257,7 @@ function add-VPN {
                         Y {add-vpn}
                         N {get-VPNInformation}
                         default {"You didn't enter an expected response, you idiot."}
-                    } 
+                    }
                 } until ($confirm -eq 'Y' -or $confirm -eq 'N')
 
     }
@@ -254,7 +277,7 @@ function add-VPN {
                 Write-Output "Unable to add VPN"
                 $_.Exception
 
-            }       
+            }
 
     }
 
@@ -262,7 +285,7 @@ function add-VPN {
 
 }
 
-#Connects to the VPN, if confirmed 
+#Connects to the VPN, if confirmed
 function connect-vpn {
 
     $vpn = Get-VpnConnection -Name $global:vpnName
@@ -279,15 +302,15 @@ function add-domain {
     $domain = read-host "`nEnter the domain name"
 
     if ((Test-netconnection $domain).pingsucceeded){
-            do 
+            do
                 {
                     $joined = $true
                     $cred = Get-Credential
-                    try 
+                    try
                         {
                             Add-Computer -DomainName $Domain -Credential $cred -ErrorAction Stop
-                        } 
-                    catch 
+                        }
+                    catch
                         {
                             $joined = $false
                             switch -regex ($_.Exception.Message) {
@@ -300,20 +323,20 @@ function add-domain {
             }
     else {write-host -ForegroundColor Red "Domain not found, check DNS settings and try again."
           add-domain
-        }  
+        }
 }
 
 #Installs ALL released windows updates
 function Install-allWindowsUpdates {
 
     #Installs the PSWINDOWSUPDATE module
-    if (get-module pswindowsupdate) 
+    if (get-module pswindowsupdate)
         {
-        
+
             write-output "PSwindowsupdate module found!"
-        
+
         }
-    else    
+    else
         {
 
             write-output "PSwindowsupdate module not found, installing..."
@@ -330,7 +353,7 @@ function Install-allWindowsUpdates {
     if ($null -ne $updates)
         {
             #If not null, only installs updates with titles that match the below strings
-            foreach($update in $updates) 
+            foreach($update in $updates)
                 {
                         if ($update.title -like "*Cumulative*" `
                             -or $update.title -like "*security*" `
@@ -338,12 +361,12 @@ function Install-allWindowsUpdates {
                             -or $update.title -like "*update for windows*" `
                             -or $update.title -like "*update for microsoft defender")
                             {
-                
+
                                 Write-output "Installing $($update.kb)"
                                 install-windowsupdate -KBArticleID $update.kb -AcceptAll -forceDownload -ForceInstall -IgnoreReboot | Select-Object result
-                
+
                             }
-                        
+
                 }
         }
     else
@@ -381,7 +404,7 @@ do {
     switch ($Addvpn)
         {
             y { add-VPN
-                
+
             }
 
             n { continue }
@@ -389,26 +412,28 @@ do {
         }
      }
      until ($Addvpn-eq 'y' -or $Addvpn -eq 'n')
+if ($Addvpn -eq "Y")
+    {
+        do {
+            $dovpn = read-host "Do you need to connect to the previously added VPN? y/n "
+            switch ($dovpn)
+                {
+                    y { connect-vpn
+                    }
 
-do {
-    $dovpn = read-host "Do you need to connect to the previously added VPN? y/n "
-    switch ($dovpn)
-        {
-            y { connect-vpn
-            }
-
-            n { continue }
-            Default { "You didn't enter an expect response, you idiot." }
-        }
-        }
-        until ($dovpn-eq 'y' -or $dovpn -eq 'n')
+                    n { continue }
+                    Default { "You didn't enter an expect response, you idiot." }
+                }
+                }
+                until ($dovpn-eq 'y' -or $dovpn -eq 'n')
+    }
 
 do {
     $doAddDomain = read-host "Do you need to connect to a domain? y/n "
     switch ($doAddDomain)
         {
             y { add-domain
-                
+
             }
 
             n { continue }
@@ -432,8 +457,8 @@ do {
             y {
 
                $token = read-host "Enter the S1 token. Copy and paste"
-               get-s1 $token 
-                
+               get-s1 $token
+
             }
 
             n { continue }
