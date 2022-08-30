@@ -1,8 +1,12 @@
 # PCSetup
 ## Baseline PC Setup script
 
+- Right click the above .ps1 file
+- Select 'Save link as'
+- Save to a USB, ensuring the .ps1 extension is kept
+- Move USB to client's new PC
 - Open powershell as admin  
-- CD to location (probably C:\users\sysadmin\downloads)  
+- CD to location
 - run: `powershell.exe -executionpolicy unrestricted .\PCSetup.ps1`
 
 ### Does the following:  
@@ -14,4 +18,4 @@
   - Installs S1 (if needed)  
   - Sets up, and connects to, a VPN (if needed)  
   - Connects to a domain (If needed)  
-  - Installs all currently released windows updates (with no reboot, some may fail)  
+  - Installs all currently released windows updates (with no reboot, some may fail)
