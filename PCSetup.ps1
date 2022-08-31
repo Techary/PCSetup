@@ -71,7 +71,7 @@ Function invoke-debloat {
                     Get-AppxProvisionedPackage -Online | Where-Object DisplayName -like $Bloat | Remove-AppxProvisionedPackage -Online -ErrorAction Stop
 
                 }
-            catch 
+            catch
                 {
                     Write-Output "Unable to uninstall $bloat" $_.Exception
                     $uninstallError = $true
@@ -98,14 +98,12 @@ function Remove-PreviousOfficeInstall {
     #Removes windows app store version of office
     get-appxpackage | where {$_.name -like "*MicrosoftOfficeHub"} | remove-appxpackage
 
-    #Creates a folder to store the office deployment tool
-    new-item -ItemType "directory" -path C:\ODT -ErrorAction SilentlyContinue
     #Creates the configuration xml, blank
-    New-Item "C:\odt\configuration.xml"
+    New-Item "C:\temp\configuration.xml"
 
     start-sleep 1
     #Fills out the configuration xml with instructions to remove any instances of office installed via the standalone launcher
-    Set-Content "C:\odt\configuration.xml" '<Configuration>
+    Set-Content "C:\temp\configuration.xml" '<Configuration>
     <Display Level="none" CompletionNotice="no" SuppressModal="yes" AcceptEula="yes" />
     <Logging Level="Standard" Path="\\path\to\Logfile\RemoveOffice2016\Logs" />
     <Remove All="TRUE" />
@@ -114,11 +112,11 @@ function Remove-PreviousOfficeInstall {
     start-sleep 1
     #Downloads the ODT tool
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_13929-20296.exe" -outfile "C:\odt\odt.exe"
+    Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_13929-20296.exe" -outfile "C:\temp\odt.exe"
 
-    Set-Location C:\odt
+    Set-Location C:\temp
     #Extracts the setup.exe from the ODT tool
-    .\odt.exe /extract:C:\ODT /quiet
+    .\odt.exe /extract:C:\temp /quiet
 
     start-sleep 1
     #Installs office via the setup.exe, using the configuration xml created on line 85
@@ -130,17 +128,20 @@ function Remove-PreviousOfficeInstall {
 #Installs chrome
 function get-chrome {
     #Downloads chrome installer
-    $url = "http://dl.google.com/chrome/install/375.126/chrome_installer.exe"
-    $ChromePath = "C:\users\$env:username\chrome.exe"
+    $chrome = @{
+
+                    url = "http://dl.google.com/chrome/install/375.126/chrome_installer.exe"
+                    Path = "C:\temp\chrome.exe"
+
+                }
     write-host "Downloading Google Chrome"
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $url -OutFile $ChromePath
+    Invoke-WebRequest @chrome
     #Ensures that chrome is downloaded (somtimes the download fails)
-    if((test-path $ChromePath) -eq "True")
+    if((test-path $Chrome.Path) -eq "True")
         {
             #If downloaded, silently launches the installer
-            Set-Location C:\users\$env:username
-            .\chrome.exe /silent /install
+            start-process -filepath $chrome.path -ArgumentList "/silent /install" -Wait
             write-host "Installing chrome..."
 
         }
@@ -155,12 +156,9 @@ function get-chrome {
 
 #Installs office 365
 function get-office {
-    #Creats the dir, same as line 78. Does not give an error if the dir already exists
-    new-item -ItemType "directory" -path C:\ODT -ErrorAction SilentlyContinue
 
-    start-sleep 1
     #Changes the configuration xml to install the correct version of office
-    Set-Content "C:\odt\configuration.xml" '<Configuration ID="ed9360b9-7bc9-42de-b1df-559951506f10">
+    Set-Content "C:\temp\configuration.xml" '<Configuration ID="ed9360b9-7bc9-42de-b1df-559951506f10">
                                             <Add OfficeClientEdition="64" Channel="Current">
                                                 <Product ID="O365BusinessRetail">
                                                 <Language ID="MatchOS" />
@@ -185,7 +183,7 @@ function get-office {
 
     start-sleep 1
 
-    Set-Location C:\odt
+    Set-Location C:\temp
     #Installs office via the setup.exe, using the configuration xml created on line 138. If you're running this manually, ENSURE YOU HAVE RUN LINES 94 & 98 FIRST.
     .\setup.exe /configure configuration.xml
 
@@ -194,16 +192,18 @@ function get-office {
 #Installs adobe
 function get-Adobe {
     #Downloads the adobe installer
-    $url = "http://ardownload.adobe.com/pub/adobe/reader/win/AcrobatDC/2100120155/AcroRdrDC2100120155_en_US.exe"
-    $AdobePath = "C:\users\$env:username\adobe.exe"
+    $adobe = @{
+                    url = "http://ardownload.adobe.com/pub/adobe/reader/win/AcrobatDC/2100120155/AcroRdrDC2100120155_en_US.exe"
+                    Path = "C:\temp\adobe.exe"
+              }
     write-host "Downloading Adobe Acrobat"
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -Uri $url -OutFile $AdobePath
+    Invoke-WebRequest @adobe
     #Ensures that adobe is downloaded (somtimes the download fails)
-    if((test-path -path $AdobePath) -eq "True")
+    if((test-path -path $Adobe.Path) -eq "True")
         {
             #If downloaded, launches the installer
-            Start-Process -filepath $AdobePath -ArgumentList "/sPB /rs"
+            Start-Process -filepath $AdobePath -ArgumentList "/sPB /rs" -wait
             write-host "Installing Adobe... "
 
         }
@@ -226,10 +226,17 @@ function Get-S1 {
 
         )
     #Downloads the S1 installer from the Techary hosted FTP
-    invoke-webrequest "content.techary.com/SentinelInstaller-x64_windows_64bit_v21_7_5_1080.exe" -OutFile "SentinelOneAgent.exe"
+    $s1 = @{
+
+                uri = "content.techary.com/SentinelInstaller-x64_windows_64bit_v21_7_5_1080.exe"
+                path = "C:\temp\SentinelOneAgent.exe"
+
+            }
+    $ProgressPreference = 'SilentlyContinue'
+    invoke-webrequest @s1
 
     #Launches the S1 installer using the provided token
-    .\SentinelOneAgent.exe /SITE_TOKEN=$token /silent /norestart
+    start-process -FilePath $s1.path -ArgumentList "/SITE_TOKEN=$token /silent /norestart"
 
 
 }
