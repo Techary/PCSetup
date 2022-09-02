@@ -141,7 +141,7 @@ function get-chrome {
     if((test-path $Chrome.outfile) -eq "True")
         {
             #If downloaded, silently launches the installer
-            start-process -filepath $chrome.path -ArgumentList "/silent /install" -Wait
+            start-process -filepath $chrome.outfile -ArgumentList "/silent /install" -Wait
             write-host "Installing chrome..."
 
         }
@@ -203,7 +203,7 @@ function get-Adobe {
     if((test-path -path $Adobe.outfile) -eq "True")
         {
             #If downloaded, launches the installer
-            Start-Process -filepath $AdobePath -ArgumentList "/sPB /rs" -wait
+            Start-Process -filepath $Adobe.outfile -ArgumentList "/sPB /rs" -wait
             write-host "Installing Adobe... "
 
         }
