@@ -131,14 +131,14 @@ function get-chrome {
     $chrome = @{
 
                     url = "http://dl.google.com/chrome/install/375.126/chrome_installer.exe"
-                    Path = "C:\temp\chrome.exe"
+                    outfile = "C:\temp\chrome.exe"
 
                 }
     write-host "Downloading Google Chrome"
     $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest @chrome
     #Ensures that chrome is downloaded (somtimes the download fails)
-    if((test-path $Chrome.Path) -eq "True")
+    if((test-path $Chrome.outfile) -eq "True")
         {
             #If downloaded, silently launches the installer
             start-process -filepath $chrome.path -ArgumentList "/silent /install" -Wait
@@ -194,13 +194,13 @@ function get-Adobe {
     #Downloads the adobe installer
     $adobe = @{
                     url = "http://ardownload.adobe.com/pub/adobe/reader/win/AcrobatDC/2100120155/AcroRdrDC2100120155_en_US.exe"
-                    Path = "C:\temp\adobe.exe"
+                    outfile = "C:\temp\adobe.exe"
               }
     write-host "Downloading Adobe Acrobat"
     $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest @adobe
     #Ensures that adobe is downloaded (somtimes the download fails)
-    if((test-path -path $Adobe.Path) -eq "True")
+    if((test-path -path $Adobe.outfile) -eq "True")
         {
             #If downloaded, launches the installer
             Start-Process -filepath $AdobePath -ArgumentList "/sPB /rs" -wait
@@ -229,14 +229,14 @@ function Get-S1 {
     $s1 = @{
 
                 uri = "content.techary.com/SentinelInstaller-x64_windows_64bit_v21_7_5_1080.exe"
-                path = "C:\temp\SentinelOneAgent.exe"
+                outfile = "C:\temp\SentinelOneAgent.exe"
 
             }
     $ProgressPreference = 'SilentlyContinue'
     invoke-webrequest @s1
 
     #Launches the S1 installer using the provided token
-    start-process -FilePath $s1.path -ArgumentList "/SITE_TOKEN=$token /silent /norestart"
+    start-process -FilePath $s1.outfile -ArgumentList "/SITE_TOKEN=$token /silent /norestart"
 
 
 }
