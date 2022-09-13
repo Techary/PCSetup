@@ -130,7 +130,7 @@ function get-chrome {
     #Downloads chrome installer
     $chrome = @{
 
-                    url = "http://dl.google.com/chrome/install/375.126/chrome_installer.exe"
+                    uri = "http://dl.google.com/chrome/install/375.126/chrome_installer.exe"
                     outfile = "C:\temp\chrome.exe"
 
                 }
@@ -193,7 +193,7 @@ function get-office {
 function get-Adobe {
     #Downloads the adobe installer
     $adobe = @{
-                    url = "http://ardownload.adobe.com/pub/adobe/reader/win/AcrobatDC/2100120155/AcroRdrDC2100120155_en_US.exe"
+                    uri = "http://ardownload.adobe.com/pub/adobe/reader/win/AcrobatDC/2100120155/AcroRdrDC2100120155_en_US.exe"
                     outfile = "C:\temp\adobe.exe"
               }
     write-host "Downloading Adobe Acrobat"
