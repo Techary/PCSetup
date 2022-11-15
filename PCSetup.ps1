@@ -1,4 +1,4 @@
-﻿param([switch]$Elevated)
+param([switch]$Elevated)
 
 function Test-Admin {
   $currentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
@@ -403,6 +403,15 @@ function cleanUp {
 
 
 # -----------------------------------------------------------------------------------------------------------------
+
+$TempExist = test-path C:\Temp
+
+if ($TempExist -eq $false)
+    {
+
+        new-item -ItemType Directory -path C:\ -Name Temp -ErrorAction SilentlyContinue
+
+    }
 
 invoke-debloat
 
