@@ -1,8 +1,7 @@
 # PCSetup
 ## Baseline PC Setup script
 
-- Right click the above .ps1 file
-- Select 'Save link as'
+- Download the .ps1 file
 - Save to a USB, ensuring the .ps1 extension is kept
 - Move USB to client's new PC
 - Open powershell as admin  
