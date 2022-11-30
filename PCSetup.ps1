@@ -388,12 +388,7 @@ function Install-allWindowsUpdates {
 #Removes installers and created temp dir's
 function cleanUp {
 
-    Remove-Item -recurse -force "C:\odt"
-
-    Remove-Item -recurse "C:\users\$env:username\adobe.exe"
-
-    Remove-Item -recurse "C:\users\$env:username\chrome.exe"
-
+    Remove-Item -recurse -force "C:\temp\*"
 
 }
 
