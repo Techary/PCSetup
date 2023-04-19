@@ -88,8 +88,8 @@ Function invoke-debloat {
 
                 }
 
-
         }
+
 }
 
 #removes previous installations of office (either windows app store or standalone launcher)
@@ -362,11 +362,12 @@ function Install-allWindowsUpdates {
             #If not null, only installs updates with titles that match the below strings
             foreach($update in $updates)
                 {
-                        if ($update.title -like "*Cumulative*" `
-                            -or $update.title -like "*security*" `
-                            -or $update.title -like "*Malicious*" `
-                            -or $update.title -like "*update for windows*" `
-                            -or $update.title -like "*update for microsoft defender")
+
+                    if ($update.title -like "*Cumulative*" `
+                        -or $update.title -like "*security*" `
+                        -or $update.title -like "*Malicious*" `
+                        -or $update.title -like "*update for windows*" `
+                        -or $update.title -like "*update for microsoft defender")
                             {
 
                                 Write-output "Installing $($update.kb)"
