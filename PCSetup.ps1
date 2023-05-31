@@ -112,7 +112,7 @@ function Remove-PreviousOfficeInstall {
     start-sleep 1
     #Downloads the ODT tool
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_13929-20296.exe" -outfile "C:\temp\odt.exe"
+    Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_16327-20214.exe" -outfile "C:\temp\odt.exe"
 
     Set-Location C:\temp
     #Extracts the setup.exe from the ODT tool
