@@ -228,7 +228,7 @@ function Get-S1 {
     #Downloads the S1 installer from the Techary hosted FTP
     $s1 = @{
 
-                uri = "content.techary.com/SentinelInstaller-x64_windows_64bit_v21_7_5_1080.exe"
+                uri = "content.techary.com/SentinelOneInstaller_windows_64bit_v22_3_4_612.exe"
                 outfile = "C:\temp\SentinelOneAgent.exe"
 
             }
