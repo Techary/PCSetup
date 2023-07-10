@@ -112,7 +112,7 @@ function Remove-PreviousOfficeInstall {
     start-sleep 1
     #Downloads the ODT tool
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_13929-20296.exe" -outfile "C:\temp\odt.exe"
+    Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_16501-20196.exe" -outfile "C:\temp\odt.exe"
 
     Set-Location C:\temp
     #Extracts the setup.exe from the ODT tool
@@ -228,7 +228,7 @@ function Get-S1 {
     #Downloads the S1 installer from the Techary hosted FTP
     $s1 = @{
 
-                uri = "content.techary.com/SentinelInstaller-x64_windows_64bit_v21_7_5_1080.exe"
+                uri = "content.techary.com/SentinelOneInstaller_windows_64bit_v22_3_4_612.exe"
                 outfile = "C:\temp\SentinelOneAgent.exe"
 
             }
