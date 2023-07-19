@@ -184,7 +184,7 @@ function get-office {
     start-sleep 1
 
     Set-Location C:\temp
-    #Installs office via the setup.exe, using the configuration xml created on line 138. If you're running this manually, ENSURE YOU HAVE RUN LINES 94 & 98 FIRST.
+    #Installs office via the setup.exe, using the configuration xml created on line 138. If you're running this manually, ENSURE YOU HAVE RUN Remove-PreviousOfficeInstall FIRST.
     .\setup.exe /configure configuration.xml
 
 }
@@ -251,7 +251,7 @@ function add-VPN {
 
         $global:serveraddress = read-host "`nEnter the hostname (recommended) or IP of the VPN server"
 
-        $global:psk = read-host "`nEnter the PSK of the L2TP VPN"
+        $global:psk = read-host -AsSecureString "`nEnter the PSK of the L2TP VPN"
 
         $global:VPNUsername = read-host "`nEnter the username for the VPN"
 
