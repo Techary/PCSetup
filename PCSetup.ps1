@@ -275,7 +275,7 @@ function add-VPN {
         try
             {
 
-                Add-VpnConnection -Name $global:vpnName -ServerAddress $global:serveraddress  -TunnelType "L2tp" -L2tpPsk $global:psk -AuthenticationMethod Pap -SplitTunneling -RememberCredential -PassThru -ErrorAction SilentlyContinue
+                Add-VpnConnection -Name $global:vpnName -ServerAddress $global:serveraddress -TunnelType "L2tp" -L2tpPsk $global:psk -AuthenticationMethod Pap -SplitTunneling -RememberCredential -PassThru -ErrorAction SilentlyContinue
 
             }
         catch
