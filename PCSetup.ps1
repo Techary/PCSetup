@@ -34,8 +34,6 @@ function CountDown() {
     Start-Sleep -Seconds 1
   }
 }
-
-#Removes pre-installed windows bloatware
 Function invoke-debloat {
 
     $Bloatware = @(
@@ -91,72 +89,50 @@ Function invoke-debloat {
         }
 
 }
-
-#removes previous installations of office (either windows app store or standalone launcher)
 function Remove-PreviousOfficeInstall {
-
-    #Removes windows app store version of office
     get-appxpackage | where {$_.name -like "*MicrosoftOfficeHub"} | remove-appxpackage
-
-    #Creates the configuration xml, blank
     New-Item "C:\temp\configuration.xml"
-
     start-sleep 1
-    #Fills out the configuration xml with instructions to remove any instances of office installed via the standalone launcher
     Set-Content "C:\temp\configuration.xml" '<Configuration>
     <Display Level="none" CompletionNotice="no" SuppressModal="yes" AcceptEula="yes" />
     <Logging Level="Standard" Path="\\path\to\Logfile\RemoveOffice2016\Logs" />
     <Remove All="TRUE" />
     </Configuration>'
-
     start-sleep 1
-    #Downloads the ODT tool
     $ProgressPreference = 'SilentlyContinue'
     Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_16501-20196.exe" -outfile "C:\temp\odt.exe"
-
     Set-Location C:\temp
-    #Extracts the setup.exe from the ODT tool
     .\odt.exe /extract:C:\temp /quiet
-
     start-sleep 1
-    #Installs office via the setup.exe, using the configuration xml created on line 85
     .\setup.exe /configure configuration.xml
-
-
 }
-
-#Installs chrome
-function get-chrome {
-    #Downloads chrome installer
-    $chrome = @{
-
-                    uri = "http://dl.google.com/chrome/install/375.126/chrome_installer.exe"
-                    outfile = "C:\temp\chrome.exe"
-
-                }
-    write-host "Downloading Google Chrome"
+function install-winget {
     $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest @chrome
-    #Ensures that chrome is downloaded (somtimes the download fails)
-    if((test-path $Chrome.outfile) -eq "True")
-        {
-            #If downloaded, silently launches the installer
-            start-process -filepath $chrome.outfile -ArgumentList "/silent /install" -Wait
-            write-host "Installing chrome..."
-
-        }
-    else
-        {
-            #If not downloaded, downloads
-            Write-host "Chrome not downloaded, downloading..."
-            get-chrome
-
-        }
+    $releases = Invoke-RestMethod https://api.github.com/repos/microsoft/microsoft-ui-xaml/releases |  ForEach-Object { $_ } | where {$_.name -like "Microsoft.UI.Xaml*"}
+    #$releases.assets.browser_download_url
+    $ui_xml_url = ($releases.assets | where {$_.browser_download_url -like "*x64.appx"}).browser_download_url[0]
+    invoke-webrequest -uri $ui_xml_url -outfile C:\temp\Microsoft.UI.Xaml.x64.appx
+    Add-AppxPackage -path C:\temp\Microsoft.UI.Xaml.x64.appx
+    Invoke-WebRequest -Uri https://aka.ms/Microsoft.VCLibs.x64.14.00.Desktop.appx -OutFile C:\temp\Microsoft.VCLibs.x64.14.00.Desktop.appx
+    Add-AppxPackage C:\temp\Microsoft.VCLibs.x64.14.00.Desktop.appx
+    $wingetURL = ((Invoke-RestMethod https://api.github.com/repos/microsoft/winget-cli/releases/latest).assets | where {$_.browser_download_url -like "*msixbundle"}).browser_download_url
+    new-item -ItemType directory C:\temp -force | out-null
+    invoke-webrequest -uri $wingetURL -OutFile C:\temp\winget.msixbundle
+    Add-AppxPackage -path C:\temp\winget.msixbundle
+    Set-PSRepository -Name "PSgallery" -InstallationPolicy Trusted
+    install-module Microsoft.WinGet.Client
+    import-module microsoft.winget.Client   
 }
-
-#Installs office 365
-function get-office {
-
+function install-3rdpartySoftware {
+    $apps = @(
+        "Google.Chrome",
+        "Adobe.Acrobat.Reader.64-bit"
+    )
+    foreach ($appToInstall in $apps) {
+        install-wingetpackage $appToInstall -mode 'silent'
+    }
+}
+function install-office {
     #Changes the configuration xml to install the correct version of office
     Set-Content "C:\temp\configuration.xml" '<Configuration ID="ed9360b9-7bc9-42de-b1df-559951506f10">
                                             <Add OfficeClientEdition="64" Channel="Current">
@@ -182,41 +158,9 @@ function get-office {
                                             </Configuration>'
 
     start-sleep 1
-
-    Set-Location C:\temp
-    #Installs office via the setup.exe, using the configuration xml created on line 138. If you're running this manually, ENSURE YOU HAVE RUN Remove-PreviousOfficeInstall FIRST.
-    .\setup.exe /configure configuration.xml
-
+    winget install Microsoft.Office --override "/configure C:\temp\configuration.xml"
 }
 
-#Installs adobe
-function get-Adobe {
-    #Downloads the adobe installer
-    $adobe = @{
-                    uri = "http://ardownload.adobe.com/pub/adobe/reader/win/AcrobatDC/2100120155/AcroRdrDC2100120155_en_US.exe"
-                    outfile = "C:\temp\adobe.exe"
-              }
-    write-host "Downloading Adobe Acrobat"
-    $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest @adobe
-    #Ensures that adobe is downloaded (somtimes the download fails)
-    if((test-path -path $Adobe.outfile) -eq "True")
-        {
-            #If downloaded, launches the installer
-            Start-Process -filepath $Adobe.outfile -ArgumentList "/sPB /rs" -wait
-            write-host "Installing Adobe... "
-
-        }
-    else
-        {
-            #If not downloaded, downloads
-            Write-host "Adobe Acrobat not downloaded, downloading..."
-            get-adobe
-
-        }
-}
-
-#Installs S1 (THIS WILL NOT WORK WHEN RUNNING MANUALLY)
 function Get-S1 {
 
     Param
@@ -228,7 +172,7 @@ function Get-S1 {
     #Downloads the S1 installer from the Techary hosted FTP
     $s1 = @{
 
-                uri = "content.techary.com/SentinelOneInstaller_windows_64bit_v22_3_4_612.exe"
+                uri = "content.techary.com/SentinelOneWindowsAgent.exe"
                 outfile = "C:\temp\SentinelOneAgent.exe"
 
             }
@@ -455,13 +399,9 @@ do {
      until ($doAddDomain-eq 'y' -or $doAddDomain -eq 'n')
 
 Remove-PreviousOfficeInstall
-
-get-chrome
-
-get-office
-
-get-adobe
-
+install-winget
+install-3rdpartySoftware
+install-office
 do {
     $DoS1 = read-host "Do you need to Install S1? Y/N"
     switch ($DoS1)
