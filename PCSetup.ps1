@@ -126,10 +126,10 @@ function Remove-PreviousOfficeInstall {
     </Configuration>'
     start-sleep 1
     winget install Microsoft.OfficeDeploymentTool -l C:\temp
-    Set-Location C:\Program Files\OfficeDeploymentTool
-    .\odt.exe /extract:C:\temp /quiet
-    start-sleep 1
-    .\setup.exe /configure configuration.xml
+    Set-Location "C:\Program Files\OfficeDeploymentTool"
+    #.\odt.exe /extract:C:\temp /quiet
+    #start-sleep 1
+    .\setup.exe /configure "C:\temp\configuration.xml"
 }
 function install-office {
     #Changes the configuration xml to install the correct version of office
@@ -157,7 +157,8 @@ function install-office {
                                             </Configuration>'
 
     start-sleep 1
-    winget install Microsoft.Office --override "/configure C:\temp\configuration.xml"
+    Remove-Item -Path "HKCU:\Software\Microsoft\Office" -Recurse -Force
+    winget install Microsoft.Office --override "/configure C:\temp\configuration.xml" --silent
 }
 
 function Get-S1 {
