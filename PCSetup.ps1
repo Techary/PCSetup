@@ -397,9 +397,8 @@ do {
         }
      }
      until ($doAddDomain-eq 'y' -or $doAddDomain -eq 'n')
-
-Remove-PreviousOfficeInstall
 install-winget
+Remove-PreviousOfficeInstall
 install-3rdpartySoftware
 install-office
 do {
