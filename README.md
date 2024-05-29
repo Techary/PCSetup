@@ -1,12 +1,8 @@
 # PCSetup
 ## Baseline PC Setup script
 
-- Download the .ps1 file
-- Save to a USB, ensuring the .ps1 extension is kept
-- Move USB to client's new PC
-- Open powershell as admin  
-- CD to location
-- run: `powershell.exe -executionpolicy unrestricted .\PCSetup.ps1`
+- Run `set-executionpolicy unrestricted; invoke-webrequest https://raw.githubusercontent.com/Techary/PCSetup/beta/PCSetup.ps1 -outfile PCSetup.ps1; .\PCSetup.ps1`
+- Profit
 
 ### Does the following:  
   - Removes pre-installed bloatware  

@@ -89,23 +89,6 @@ Function invoke-debloat {
         }
 
 }
-function Remove-PreviousOfficeInstall {
-    get-appxpackage | where {$_.name -like "*MicrosoftOfficeHub"} | remove-appxpackage
-    New-Item "C:\temp\configuration.xml"
-    start-sleep 1
-    Set-Content "C:\temp\configuration.xml" '<Configuration>
-    <Display Level="none" CompletionNotice="no" SuppressModal="yes" AcceptEula="yes" />
-    <Logging Level="Standard" Path="\\path\to\Logfile\RemoveOffice2016\Logs" />
-    <Remove All="TRUE" />
-    </Configuration>'
-    start-sleep 1
-    $ProgressPreference = 'SilentlyContinue'
-    Invoke-WebRequest -uri "https://download.microsoft.com/download/2/7/A/27AF1BE6-DD20-4CB4-B154-EBAB8A7D4A7E/officedeploymenttool_16501-20196.exe" -outfile "C:\temp\odt.exe"
-    Set-Location C:\temp
-    .\odt.exe /extract:C:\temp /quiet
-    start-sleep 1
-    .\setup.exe /configure configuration.xml
-}
 function install-winget {
     $ProgressPreference = 'SilentlyContinue'
     $releases = Invoke-RestMethod https://api.github.com/repos/microsoft/microsoft-ui-xaml/releases |  ForEach-Object { $_ } | where {$_.name -like "Microsoft.UI.Xaml*"}
@@ -131,6 +114,22 @@ function install-3rdpartySoftware {
     foreach ($appToInstall in $apps) {
         install-wingetpackage $appToInstall -mode 'silent'
     }
+}
+function Remove-PreviousOfficeInstall {
+    get-appxpackage | where {$_.name -like "*MicrosoftOfficeHub"} | remove-appxpackage
+    New-Item "C:\temp\configuration.xml"
+    start-sleep 1
+    Set-Content "C:\temp\configuration.xml" '<Configuration>
+    <Display Level="none" CompletionNotice="no" SuppressModal="yes" AcceptEula="yes" />
+    <Logging Level="Standard" Path="\\path\to\Logfile\RemoveOffice2016\Logs" />
+    <Remove All="TRUE" />
+    </Configuration>'
+    start-sleep 1
+    winget install Microsoft.OfficeDeploymentTool -l C:\temp
+    Set-Location C:\Program Files\OfficeDeploymentTool
+    .\odt.exe /extract:C:\temp /quiet
+    start-sleep 1
+    .\setup.exe /configure configuration.xml
 }
 function install-office {
     #Changes the configuration xml to install the correct version of office
