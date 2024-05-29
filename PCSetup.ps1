@@ -103,6 +103,7 @@ function install-winget {
     invoke-webrequest -uri $wingetURL -OutFile C:\temp\winget.msixbundle
     Add-AppxPackage -path C:\temp\winget.msixbundle
     Set-PSRepository -Name "PSgallery" -InstallationPolicy Trusted
+    Install-PackageProvider -Name NuGet -force
     install-module Microsoft.WinGet.Client
     import-module microsoft.winget.Client   
 }
@@ -125,40 +126,42 @@ function Remove-PreviousOfficeInstall {
     <Remove All="TRUE" />
     </Configuration>'
     start-sleep 1
-    winget install Microsoft.OfficeDeploymentTool -l C:\temp
+    winget install Microsoft.OfficeDeploymentTool --silent
     Set-Location "C:\Program Files\OfficeDeploymentTool"
     #.\odt.exe /extract:C:\temp /quiet
     #start-sleep 1
     .\setup.exe /configure "C:\temp\configuration.xml"
 }
 function install-office {
-    #Changes the configuration xml to install the correct version of office
-    Set-Content "C:\temp\configuration.xml" '<Configuration ID="ed9360b9-7bc9-42de-b1df-559951506f10">
-                                            <Add OfficeClientEdition="64" Channel="Current">
-                                                <Product ID="O365BusinessRetail">
-                                                <Language ID="MatchOS" />
-                                                <ExcludeApp ID="Groove" />
-                                                </Product>
-                                            </Add>
-                                            <Property Name="SharedComputerLicensing" Value="0" />
-                                            <Property Name="SCLCacheOverride" Value="0" />
-                                            <Property Name="AUTOACTIVATE" Value="0" />
-                                            <Property Name="FORCEAPPSHUTDOWN" Value="FALSE" />
-                                            <Property Name="DeviceBasedLicensing" Value="0" />
-                                            <Updates Enabled="TRUE" />
-                                            <RemoveMSI />
-                                            <AppSettings>
-                                                <Setup Name="Company" Value=" " />
-                                                <User Key="software\microsoft\office\16.0\excel\options" Name="defaultformat" Value="51" Type="REG_DWORD" App="excel16" Id="L_SaveExcelfilesas" />
-                                                <User Key="software\microsoft\office\16.0\powerpoint\options" Name="defaultformat" Value="27" Type="REG_DWORD" App="ppt16" Id="L_SavePowerPointfilesas" />
-                                                <User Key="software\microsoft\office\16.0\word\options" Name="defaultformat" Value="" Type="REG_SZ" App="word16" Id="L_SaveWordfilesas" />
-                                            </AppSettings>
-                                            <Display Level="none" AcceptEULA="TRUE" />
-                                            </Configuration>'
+    start-job -ScriptBlock {
+        #Changes the configuration xml to install the correct version of office
+        Set-Content "C:\temp\configuration.xml" '<Configuration ID="ed9360b9-7bc9-42de-b1df-559951506f10">
+                                                <Add OfficeClientEdition="64" Channel="Current">
+                                                    <Product ID="O365BusinessRetail">
+                                                    <Language ID="MatchOS" />
+                                                    <ExcludeApp ID="Groove" />
+                                                    </Product>
+                                                </Add>
+                                                <Property Name="SharedComputerLicensing" Value="0" />
+                                                <Property Name="SCLCacheOverride" Value="0" />
+                                                <Property Name="AUTOACTIVATE" Value="0" />
+                                                <Property Name="FORCEAPPSHUTDOWN" Value="FALSE" />
+                                                <Property Name="DeviceBasedLicensing" Value="0" />
+                                                <Updates Enabled="TRUE" />
+                                                <RemoveMSI />
+                                                <AppSettings>
+                                                    <Setup Name="Company" Value=" " />
+                                                    <User Key="software\microsoft\office\16.0\excel\options" Name="defaultformat" Value="51" Type="REG_DWORD" App="excel16" Id="L_SaveExcelfilesas" />
+                                                    <User Key="software\microsoft\office\16.0\powerpoint\options" Name="defaultformat" Value="27" Type="REG_DWORD" App="ppt16" Id="L_SavePowerPointfilesas" />
+                                                    <User Key="software\microsoft\office\16.0\word\options" Name="defaultformat" Value="" Type="REG_SZ" App="word16" Id="L_SaveWordfilesas" />
+                                                </AppSettings>
+                                                <Display Level="none" AcceptEULA="TRUE" />
+                                                </Configuration>'
 
-    start-sleep 1
-    Remove-Item -Path "HKCU:\Software\Microsoft\Office" -Recurse -Force
-    winget install Microsoft.Office --override "/configure C:\temp\configuration.xml" --silent
+        start-sleep 1
+        Remove-Item -Path "HKCU:\Software\Microsoft\Office" -Recurse -Force
+        winget install Microsoft.Office --override "/configure C:\temp\configuration.xml" --silent
+    }
 }
 
 function Get-S1 {
